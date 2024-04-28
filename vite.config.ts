@@ -1,16 +1,30 @@
-import pages from '@hono/vite-cloudflare-pages'
-import honox from 'honox/vite'
-import client from 'honox/vite/client'
-import { defineConfig } from 'vite'
+import pages from '@hono/vite-cloudflare-pages';
+import adapter from '@hono/vite-dev-server/cloudflare';
+import honox from 'honox/vite';
+import client from 'honox/vite/client';
+import { defineConfig } from 'vite';
+
+const baseConfig = {
+  ssr: {
+    external: ['@prisma/client', '@prisma/adapter-d1'],
+  },
+};
 
 export default defineConfig(({ mode }) => {
   if (mode === 'client') {
     return {
-      plugins: [client()]
-    }
+      ...baseConfig,
+      plugins: [client()],
+    };
   } else {
     return {
-      plugins: [honox(), pages()]
-    }
+      ...baseConfig,
+      plugins: [
+        honox({
+          devServer: { adapter },
+        }),
+        pages(),
+      ],
+    };
   }
-})
+});
