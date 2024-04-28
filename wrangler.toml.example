@@ -1,0 +1,8 @@
+name = "authorization-sample"
+compatibility_date = "2023-12-01"
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "b2b_saas_authorization_sample"
+database_id = "__YOUR_DATABASE_ID__"
