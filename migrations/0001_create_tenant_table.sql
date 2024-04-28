@@ -1,1 +1,5 @@
--- Migration number: 0001 	 2024-04-28T08:17:37.164Z
+-- CreateTable
+CREATE TABLE "Tenant" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL
+);
