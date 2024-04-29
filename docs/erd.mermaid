@@ -1,0 +1,91 @@
+erDiagram
+    Tenant {
+        int id PK
+        string name
+    }
+    Workspace {
+        int id PK
+        int tenantId FK
+        string name
+        string description
+    }
+    Group {
+        int id PK
+        int workspaceId FK
+        string name
+        string description
+    }
+    User {
+        int id PK
+        int tenantId FK
+        string name
+        string email
+    }
+    WorkspaceMembership {
+        int id PK
+        int workspaceId FK
+        int userId FK
+    }
+    GroupMembership {
+        int id PK
+        int userId FK
+        int groupId FK
+    }
+    Role {
+        int id PK
+        string name
+    }
+    UserRole {
+        int id PK
+        int userId FK
+        int roleId FK
+        int workspaceId FK
+    }
+    AccessRight {
+        int id PK
+        string name
+    }
+    SecuredResource {
+        int id PK
+        string resourceType
+        int relatedResourceId
+    }
+    AccessRule {
+        int id PK
+        int resourceId FK
+        int accessRightId FK
+        string principalType
+        int principalId
+    }
+    Post {
+        int id PK
+        int createdById FK
+        string title
+        string content
+        dateTime createdAt
+        dateTime updatedAt
+    }
+    Comment {
+        int id PK
+        int postId FK
+        int createdById FK
+        string text
+        dateTime createdAt
+        dateTime updatedAt
+    }
+
+    Tenant ||--o{ Workspace : ""
+    Tenant ||--o{ User : ""
+    Workspace ||--o{ Group : ""
+    Workspace ||--o{ WorkspaceMembership : ""
+    Workspace ||--o{ UserRole : ""
+    User ||--o{ WorkspaceMembership : ""
+    User ||--o{ GroupMembership : ""
+    User ||--o{ UserRole : ""
+    User ||--o{ Post : "createdBy"
+    User ||--o{ Comment : "createdBy"
+    Group ||--o{ GroupMembership : ""
+    Role ||--o{ UserRole : ""
+    SecuredResource ||--o{ AccessRule : ""
+    AccessRight ||--o{ AccessRule : ""
+    Post ||--o{ Comment : ""
