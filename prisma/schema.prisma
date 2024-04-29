@@ -12,6 +12,132 @@ datasource db {
 }
 
 model Tenant {
-  id   String @id @default(cuid())
-  name String
+  id         Int         @id @default(autoincrement())
+  name       String
+  workspaces Workspace[]
+  users      User[]
+}
+
+model Workspace {
+  id          Int                   @id @default(autoincrement())
+  tenantId    Int
+  tenant      Tenant                @relation(fields: [tenantId], references: [id])
+  name        String
+  description String                @default("")
+  groups      Group[]
+  memberships WorkspaceMembership[]
+  userRoles   UserRole[]
+
+  @@unique([tenantId, name])
+}
+
+model Group {
+  id          Int               @id @default(autoincrement())
+  workspaceId Int
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id])
+  name        String
+  description String            @default("")
+  memberships GroupMembership[]
+
+  @@unique([workspaceId, name])
+}
+
+model User {
+  id                   Int                   @id @default(autoincrement())
+  tenantId             Int
+  tenant               Tenant                @relation(fields: [tenantId], references: [id])
+  name                 String
+  email                String                @unique
+  workspaceMemberships WorkspaceMembership[]
+  groupMemberships     GroupMembership[]
+  userRoles            UserRole[]
+  posts                Post[]                @relation("createdBy")
+  comments             Comment[]             @relation("createdBy")
+}
+
+model WorkspaceMembership {
+  id          Int       @id @default(autoincrement())
+  workspaceId Int
+  userId      Int
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model GroupMembership {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  groupId Int
+  user    User  @relation(fields: [userId], references: [id])
+  group   Group @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Role {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique // TenantAdmin | WorkspaceAdmin | Member | Guest
+  userRoles UserRole[]
+}
+
+model UserRole {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @unique
+  roleId      Int
+  workspaceId Int
+  user        User      @relation(fields: [userId], references: [id])
+  role        Role      @relation(fields: [roleId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([userId, roleId, workspaceId])
+}
+
+model AccessRight {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique // FULL_ACCESS | CAN_EDIT | CAN_COMMENT | CAN_VIEW
+  accessRules AccessRule[]
+}
+
+model SecuredResource {
+  id                Int          @id @default(autoincrement())
+  resourceType      String // Tenant | Workspace | User | Post
+  relatedResourceId Int
+  accessRules       AccessRule[]
+
+  @@unique([resourceType, relatedResourceId])
+}
+
+model AccessRule {
+  id              Int             @id @default(autoincrement())
+  resourceId      Int
+  accessRightId   Int
+  principalType   String // User | Grup
+  principalId     Int
+  securedResource SecuredResource @relation(fields: [resourceId], references: [id])
+  accessRight     AccessRight     @relation(fields: [accessRightId], references: [id])
+
+  @@unique([resourceId, principalType, principalId])
+}
+
+// 以降はサンプルとして想像しやすそうなものを適当に記載。提供しているドメインに合わせてモデリングをすること
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  createdById Int
+  title       String
+  content     String
+  createdAt   DateTime
+  updatedAt   DateTime
+  createdBy   User      @relation("createdBy", fields: [createdById], references: [id])
+  comments    Comment[]
+}
+
+model Comment {
+  id          Int      @id @default(autoincrement())
+  postId      Int
+  createdById Int
+  text        String
+  createdAt   DateTime
+  updatedAt   DateTime
+  createdBy   User     @relation("createdBy", fields: [createdById], references: [id])
+  Post        Post     @relation(fields: [postId], references: [id])
 }
